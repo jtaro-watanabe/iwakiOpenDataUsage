@@ -146,30 +146,6 @@ function PopulationChart() {
         datasets
       }
     }
-
-    const data = {
-      
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
-      datasets: [
-        {
-          label: "Data1",
-          data: data1,
-          backgroundColor: "rgba(87, 121, 234, 0.6)",
-          borderColor: "rgba(87, 121, 234, 0.6)",
-          yAxisID: "bar-stacked",
-          order: 1,
-        },
-        {
-          label: "Data2",
-          data: data2,
-          backgroundColor: "rgba(18, 200, 150, 0.6)",
-          borderColor: "rgba(18, 200, 150, 0.6)",
-          yAxisID: "bar-stacked",
-          order: 1,
-        },
-       ],
-    }
-    
     const options = {
       scales: {
         xAxes: [
