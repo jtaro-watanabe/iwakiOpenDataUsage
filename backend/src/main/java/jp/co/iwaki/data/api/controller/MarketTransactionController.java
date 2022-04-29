@@ -1,13 +1,20 @@
 package jp.co.iwaki.data.api.controller;
 
+import jp.co.iwaki.data.api.domain.model.resource.market.MarketItemResource;
 import jp.co.iwaki.data.api.domain.model.resource.market.MarketTransactionResource;
 import jp.co.iwaki.data.api.domain.model.response.TotalMarketTransactionResponse;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * いわき市中央市場の取引高データ取得用コントローラー
@@ -16,70 +23,81 @@ import java.util.List;
 @RestController
 public class MarketTransactionController {
 
-    private final String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
-
-    private final String REGEX_SURROUND_DOUBLEQUATATION = "^\"\"|\"\"$";
-
     @CrossOrigin
     @GetMapping("/market/transaction")
-    public TotalMarketTransactionResponse getMarketTransaction() {
+    public TotalMarketTransactionResponse getMarketTransaction() throws Exception {
         List<MarketTransactionResource> marketTransactionList = new ArrayList<>();
-        val inputStream = this.javaClass.getResourceAsStream("/csv/statistics/market/marketTransaction.csv")
 
-        val reader = inputStream?.bufferedReader()
-        try {
-            var line = reader?.readLine()
-            var rowNum = 0
+        // カンマ区切り文字のパターン作成
+        String REGEX_CSV_COMMA = ",(?=(([^\"]*\"){2})*[^\"]*$)";
+        Pattern commaPattern = Pattern.compile(REGEX_CSV_COMMA);
 
-            val commaPattern = Pattern.compile(REGEX_CSV_COMMA)
-            val doubleQuatationPattern = Pattern.compile(REGEX_SURROUND_DOUBLEQUATATION)
+        InputStream inputStream = getClass().getResourceAsStream("/csv/statistics/market/marketTransaction.csv");
 
-            while(line != null) {
-                if(rowNum > 0) {
-                    val marketRecords = commaPattern.split(line)
-                    for (i in marketRecords.indices){
-                        marketRecords[i] = marketRecords[i].replace("\"","").replace(",","")
-                    }
-
-                    val year = marketRecords[1]
-                    // 野菜
-                    val vegetable = MarketItemResource(marketRecords[2].toInt(), marketRecords[3].toLong())
-                    // 果実
-                    val fruit = MarketItemResource(marketRecords[4].toInt(), marketRecords[5].toLong())
-                    // 鳥卵加工品toDouble
-                    val processedBirdEgg = MarketItemResource(marketRecords[6].toInt(), marketRecords[7].toLong())
-                    // 青果部合計
-                    val fruitAndVegetableSectionTotal = MarketItemResource(marketRecords[8].toInt(), marketRecords[9].toLong())
-                    // 鮮魚
-                    val freshFish = MarketItemResource(marketRecords[10].toInt(), marketRecords[11].toLong())
-                    // 冷凍
-                    val frozen = MarketItemResource(marketRecords[12].toInt(), marketRecords[13].toLong())
-                    // 塩干加工品
-                    val saltDriedProducts = MarketItemResource(marketRecords[14].toInt(), marketRecords[15].toLong())
-                    // 水産物部合計
-                    val fisheriesDepartmentTotal = MarketItemResource(marketRecords[16].toInt(), marketRecords[17].toLong())
-                    // 花き部toLong
-                    val flowerPart = MarketItemResource(marketRecords[18].toInt(), marketRecords[19].toLong())
-                    // 数量総計
-                    val totalQuantity = marketRecords[20].toLong()
-                    // 金額総計
-                    val totalAmount = marketRecords[21].toLong()
-
-                    val marketTransactionResource = MarketTransactionResource(year, vegetable, fruit, processedBirdEgg, fruitAndVegetableSectionTotal, freshFish, frozen, saltDriedProducts, fisheriesDepartmentTotal, flowerPart, totalQuantity, totalAmount)
-
-                    marketTransactionList.add(marketTransactionResource)
-
-                }
-                line = reader?.readLine()
-                rowNum++
-            }
-
-        } finally {
-            inputStream?.close()
-            reader?.close()
+        if (inputStream == null) {
+            throw new Exception("取扱高CSVファイルの読み込みができません");
         }
 
-        return TotalMarketTransactionResponse(marketTransactionList)
+        // リソース上の取扱高CSVを読み込む
+        try (inputStream; BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+            String line;
+
+            int rowNum = 0;
+
+            // ファイルの読み込み開始
+            while ((line = bufferedReader.readLine()) != null) {
+
+                if(rowNum == 0){
+                    rowNum++;
+                    continue;
+                } else {
+                    rowNum++;
+                }
+
+                String[] marketRecords = commaPattern.split(line);
+
+                for(int i = 0; i < marketRecords.length;i++){
+                    // 各レコードから不要な文字列を削除する
+                    marketRecords[i] = marketRecords[i].replace("\"", "").replace(",", "");
+                }
+
+                // 年度を取得
+                String year = marketRecords[1];
+                // 野菜の取扱高
+                MarketItemResource vegetable = new MarketItemResource(Integer.parseInt(marketRecords[2]), Long.parseLong(marketRecords[3]));
+                // 果実
+                MarketItemResource fruit = new MarketItemResource(Integer.parseInt(marketRecords[4]), Long.parseLong(marketRecords[5]));
+                // 鳥卵加工品
+                MarketItemResource processedBirdEgg = new MarketItemResource(Integer.parseInt(marketRecords[6]), Long.parseLong(marketRecords[7]));
+                // 青果部合計
+                MarketItemResource fruitAndVegetableSectionTotal = new MarketItemResource(Integer.parseInt(marketRecords[8]), Long.parseLong(marketRecords[9]));
+                // 鮮魚
+                MarketItemResource freshFish = new MarketItemResource(Integer.parseInt(marketRecords[10]), Long.parseLong(marketRecords[11]));
+                // 冷凍
+                MarketItemResource frozen = new MarketItemResource(Integer.parseInt(marketRecords[12]), Long.parseLong(marketRecords[13]));
+                // 塩干加工品
+                MarketItemResource saltDriedProducts = new MarketItemResource(Integer.parseInt(marketRecords[14]), Long.parseLong(marketRecords[15]));
+                // 水産物部合計
+                MarketItemResource fisheriesDepartmentTotal = new MarketItemResource(Integer.parseInt(marketRecords[16]), Long.parseLong(marketRecords[17]));
+                // 花き部toLong
+                MarketItemResource flowerPart = new MarketItemResource(Integer.parseInt(marketRecords[18]), Long.parseLong(marketRecords[19]));
+                // 数量総計
+                Long totalQuantity = Long.parseLong(marketRecords[20]);
+                // 金額総計
+                Long totalAmount = Long.parseLong(marketRecords[21]);
+
+                // 年毎の取扱高を集計
+                MarketTransactionResource marketTransactionResource = new MarketTransactionResource(year, vegetable, fruit, processedBirdEgg, fruitAndVegetableSectionTotal, freshFish, frozen, saltDriedProducts, fisheriesDepartmentTotal, flowerPart, totalQuantity, totalAmount);
+
+                marketTransactionList.add(marketTransactionResource);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new TotalMarketTransactionResponse(marketTransactionList);
     }
 
 
