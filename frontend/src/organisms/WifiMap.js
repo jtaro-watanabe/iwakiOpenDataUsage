@@ -1,6 +1,6 @@
 import {React , useEffect , useState  } from 'react';
 import axios from 'axios';
-import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet';
+import {MapContainer, TileLayer, Marker, Popup, Tooltip} from 'react-leaflet';
 import "leaflet/dist/leaflet.css";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -72,7 +72,7 @@ function WifiMap() {
 
           {wifiMarkers.map((marker, index) => (
             <Marker key={index} position={marker.coordinates}>
-              <Popup>{marker.title}</Popup>
+              <Tooltip>{marker.title}</Tooltip>
             </Marker>
           ))}
         </MapContainer>
