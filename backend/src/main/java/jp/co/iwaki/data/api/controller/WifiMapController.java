@@ -50,8 +50,8 @@ public class WifiMapController {
                 wifiMapResource.setKana(wifiRecords[2]);
                 wifiMapResource.setPostalCode(wifiRecords[3]);
                 wifiMapResource.setAddress(wifiRecords[4]);
-                wifiMapResource.setLongitude(Double.parseDouble(wifiRecords[5]));
-                wifiMapResource.setLatitude(Double.parseDouble(wifiRecords[6]));
+                wifiMapResource.setLatitude(Double.parseDouble(wifiRecords[5]));
+                wifiMapResource.setLongitude(Double.parseDouble(wifiRecords[6]));
                 wifiMapResource.setPhoneNumber(wifiRecords[7]);
                 wifiMapResource.setFaxNumber(wifiRecords[8]);
                 wifiMapResource.setEmail(wifiRecords[9]);

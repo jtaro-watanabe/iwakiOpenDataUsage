@@ -3,6 +3,7 @@ import './App.css';
 import ButtonAppBar from './molecules/ButtonAppBar';
 import PopulationChart from './organisms/PopulationChart';
 import MarketTransactionQuantityChart from './organisms/MarketTransactionQuantityChart';
+import WifiMap from './organisms/WifiMap';
 
 import {
   BrowserRouter as Router,
@@ -21,6 +22,9 @@ function App() {
           </Route>
           <Route path="/population/">
             <PopulationChart />
+          </Route>
+          <Route path="/map/wifi/">
+            <WifiMap />
           </Route>
         </Switch>
        </Router>
